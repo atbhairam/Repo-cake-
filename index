@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kritika Bakes & Bliss</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --pink:#e75480;
+  --cream:#fff1dc;
+  --dark:#4a2c2a;
+}
+body{
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:#fff7f9;
+}
+header{
+  padding:70px 20px;
+  text-align:center;
+  background:linear-gradient(135deg,#ffc1cc,#fff1dc);
+}
+header h1{
+  font-family:'Playfair Display',serif;
+  font-size:48px;
+  color:var(--dark);
+}
+nav{
+  position:sticky;top:0;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  padding:15px;
+  box-shadow:0 6px 15px rgba(0,0,0,.1);
+}
+nav a{
+  text-decoration:none;
+  color:var(--pink);
+  font-weight:500;
+}
+section{padding:60px 20px;}
+.title{text-align:center;font-size:32px;margin-bottom:40px;}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:30px;
+}
+.card{
+  background:white;
+  border-radius:25px;
+  padding:15px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+.card img{
+  width:100%;height:200px;
+  object-fit:cover;
+  border-radius:20px;
+}
+.card button{
+  background:var(--pink);
+  border:none;
+  color:white;
+  padding:10px 18px;
+  border-radius:20px;
+  cursor:pointer;
+}
+.price{color:var(--pink);font-weight:bold;}
+
+.offer{
+  background:linear-gradient(135deg,#ffe1ea,#fff5e1);
+  padding:40px;
+  border-radius:30px;
+  text-align:center;
+}
+
+.cart-btn{
+  position:fixed;
+  bottom:20px;right:20px;
+  background:var(--pink);
+  color:white;
+  padding:15px 25px;
+  border-radius:50px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+}
+.modal-content{
+  background:white;
+  max-width:400px;
+  margin:80px auto;
+  padding:25px;
+  border-radius:20px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:12px;
+  border:1px solid #ccc;
+}
+button.full{
+  width:100%;
+  padding:12px;
+  background:var(--pink);
+  border:none;
+  color:white;
+  border-radius:15px;
+}
+
+footer{
+  background:#ffdbe7;
+  padding:25px;
+  text-align:center;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Kritika Bakes & Bliss</h1>
+<p>Baked with Love • Served with Bliss</p>
+<p><small>Owner: Kritika Patle</small></p>
+</header>
+
+<nav>
+<a href="#cakes">Cakes</a>
+<a href="#cupcakes">Cupcakes</a>
+<a href="#offers">Offers</a>
+<a href="#login">Login</a>
+</nav>
+
+<section id="cakes">
+<h2 class="title">Premium Cakes (₹500+)</h2>
+<div class="grid" id="cakeList"></div>
+</section>
+
+<section id="cupcakes">
+<h2 class="title">Cupcakes</h2>
+<div class="grid" id="cupcakeList"></div>
+</section>
+
+<section id="offers">
+<div class="offer">
+<h2>🎉 Grand Opening Offer</h2>
+<p>Use Coupon <b>KBB10</b> & get 10% OFF</p>
+<p>🎁 Free Greeting Card on Premium Cakes</p>
+</div>
+</section>
+
+<section id="login">
+<h2 class="title">Login / Register</h2>
+<div class="modal-content">
+<input placeholder="Name">
+<input placeholder="Email">
+<input type="password" placeholder="Password">
+<button class="full" onclick="alert('Welcome to Kritika Bakes & Bliss 💖')">Continue</button>
+</div>
+</section>
+
+<div class="cart-btn" onclick="openCart()">🛒 Cart (<span id="count">0</span>)</div>
+
+<div class="modal" id="cartModal">
+<div class="modal-content">
+<h3>Your Cart</h3>
+<div id="cartItems"></div>
+<input placeholder="Coupon Code" id="coupon">
+<button class="full" onclick="applyCoupon()">Apply Coupon</button>
+<p><b>Total: ₹<span id="total">0</span></b></p>
+<button class="full" onclick="closeCart()">Close</button>
+</div>
+</div>
+
+<footer>
+© 2026 Kritika Bakes & Bliss • Crafted with Love 💕
+</footer>
+
+<script>
+const cakes=[
+{name:"Chocolate Truffle",price:899,img:"https://images.unsplash.com/photo-1542826438-bd32f43d626f"},
+{name:"Red Velvet",price:999,img:"https://images.unsplash.com/photo-1603079841874-21c8d9f84d71"}
+];
+
+const cupcakes=[
+{name:"Chocolate Cupcake",price:150,img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75"},
+{name:"Vanilla Cupcake",price:120,img:"https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7"}
+];
+
+let cart=[],discount=0;
+
+function render(list,id){
+document.getElementById(id).innerHTML=list.map(p=>
+`<div class="card">
+<img src="${p.img}">
+<h3>${p.name}</h3>
+<p class="price">₹${p.price}</p>
+<button onclick='add(${JSON.stringify(p)})'>Add to Cart</button>
+</div>`).join("");
+}
+
+function add(p){
+cart.push(p);
+document.getElementById("count").innerText=cart.length;
+}
+
+function openCart(){
+document.getElementById("cartModal").style.display="block";
+updateCart();
+}
+
+function closeCart(){
+document.getElementById("cartModal").style.display="none";
+}
+
+function updateCart(){
+let total=0;
+document.getElementById("cartItems").innerHTML=cart.map(i=>{
+total+=i.price;
+return `<p>${i.name} - ₹${i.price}</p>`;
+}).join("");
+total-=discount;
+document.getElementById("total").innerText=total;
+}
+
+function applyCoupon(){
+if(document.getElementById("coupon").value==="KBB10"){
+discount= Math.floor(cart.reduce((s,i)=>s+i.price,0)*0.1);
+alert("Coupon Applied 🎉");
+}
+updateCart();
+}
+
+render(cakes,"cakeList");
+render(cupcakes,"cupcakeList");
+</script>
+
+</body>
+</html>
